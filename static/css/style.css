@@ -1,367 +1,619 @@
+/*
+================================================================================
+DENTAL CLINIC MANAGEMENT SYSTEM - MAIN STYLESHEET
+================================================================================
+
+PURPOSE:
+    This CSS file provides all styling for the Dental Clinic Management System.
+    It creates a cohesive, professional, and responsive user interface with a
+    pink/rose color scheme appropriate for a dental clinic.
+
+WHAT IT CONTAINS:
+    1. CSS Variables - Color scheme and theme configuration
+    2. Login Page Styles - Split-screen login with animations
+    3. Global Styles - Body, forms, buttons, etc.
+    4. Navigation Styles - Top navbar with logo and menu
+    5. Dashboard Styles - Cards, headers, and layout
+    6. Table Styles - Data tables with hover effects
+    7. Utility Classes - Background colors, badges, etc.
+    8. Responsive Design - Media queries for mobile/tablet
+
+DESIGN PHILOSOPHY:
+    - Pink/Rose Theme: Professional yet friendly dental clinic aesthetic
+    - Gradients: Modern, polished look with depth
+    - Animations: Subtle, smooth transitions for better UX
+    - Accessibility: High contrast, readable fonts, clear focus states
+    - Responsiveness: Mobile-first approach with breakpoints
+
+COLOR SCHEME:
+    - Primary Pink: #e2799c (main brand color)
+    - Secondary Pink: #e8739a (accents and highlights)
+    - Light Pink: #ffd4e5 (backgrounds and subtle elements)
+    - Background: #fff8fb (soft pink tinted background)
+    - Text: #4a4a4a (dark gray for readability)
+
+BROWSER SUPPORT:
+    - Modern browsers (Chrome, Firefox, Safari, Edge)
+    - CSS Grid and Flexbox for layouts
+    - CSS Variables for theming
+*/
+
+
+/* ============================================================================
+   CSS VARIABLES (CUSTOM PROPERTIES)
+   ============================================================================
+   Define all colors as CSS variables for easy theming and consistency.
+   These can be referenced throughout the stylesheet using var(--variable-name).
+
+   USAGE:
+   background-color: var(--primary-color);
+
+   BENEFITS:
+   - Easy to change theme colors in one place
+   - Maintainable and scalable
+   - Can be overridden for dark mode or themes
+   ============================================================================ */
+
 :root {
-  --primary-color: #e2799c;
-  --secondary-color: #e8739a;
-  --accent-color: #ffd4e5;
-  --background-color: #fff8fb;
-  --text-color: #4a4a4a;
-  --light-shadow: rgba(116, 106, 106, 0.1);
-  --pink-hover: #c23d6a;
+  /* Primary brand colors (pink theme for dental clinic) */
+  --primary-color: #e2799c;        /* Main pink - used for primary buttons, navbar */
+  --secondary-color: #e8739a;      /* Slightly lighter pink - hover states, accents */
+  --accent-color: #ffd4e5;         /* Light pink - backgrounds, borders */
+  --background-color: #fff8fb;     /* Very light pink tint - page background */
+
+  /* Text and shadows */
+  --text-color: #4a4a4a;          /* Dark gray - main text color for readability */
+  --light-shadow: rgba(116, 106, 106, 0.1); /* Subtle shadow for cards */
+  --pink-hover: #c23d6a;          /* Darker pink - hover state for emphasis */
 }
+
+
+/* ============================================================================
+   GLOBAL BODY STYLES
+   ============================================================================
+   Base styles applied to entire page.
+   Sets font, background, and layout foundation.
+   ============================================================================ */
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  margin: 0;
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, readable font stack */
+  background-color: var(--background-color); /* Soft pink tinted background */
+  color: var(--text-color);                  /* Dark gray text for contrast */
+  margin: 0;                                 /* Remove default margin */
+  min-height: 100vh;                         /* Ensure full viewport height */
+  overflow-x: hidden;                        /* Prevent horizontal scroll */
 }
+
+
+/* ============================================================================
+   LOGIN PAGE - SPLIT SCREEN LAYOUT
+   ============================================================================
+   Two-column layout: left side with branding, right side with login form.
+   Uses Flexbox for responsive layout.
+   ============================================================================ */
 
 .login-page {
-  min-height: 100vh;
-  display: flex;
+  min-height: 100vh;  /* Full viewport height */
+  display: flex;      /* Flexbox layout for two-column design */
 }
+
+
+/* ----------------------------------------------------------------------------
+   LOGIN LEFT SIDE - BRANDING AND WELCOME MESSAGE
+   ---------------------------------------------------------------------------- */
 
 .login-left {
-  flex: 0.7;
+  flex: 0.7;  /* Takes 70% width on larger screens */
+
+  /* Gradient background from primary to secondary pink */
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-  color: rgb(255, 254, 254);
-  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+  color: rgb(255, 254, 254);               /* White text for contrast */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2); /* Subtle shadow for readability */
+
+  /* Rounded corners on right side for modern look */
   border-top-right-radius: 60px;
   border-bottom-right-radius: 60px;
-  padding-left: 80px;
-  padding-right: 40px;
+
+  padding-left: 80px;  /* Space from left edge */
+  padding-right: 40px; /* Space from right edge */
+
+  /* Animation setup: starts off-screen left */
   transform: translateX(-100%);
-  animation: slideInFrame 1s ease-out forwards;
+  animation: slideInFrame 1s ease-out forwards; /* Slides in on page load */
 }
 
+/* Slide-in animation for login left panel */
 @keyframes slideInFrame {
   from {
-    transform: translateX(-100%);
-    opacity: 0;
+    transform: translateX(-100%); /* Start: completely off-screen left */
+    opacity: 0;                   /* Start: invisible */
   }
   to {
-    transform: translateX(0);
-    opacity: 1;
+    transform: translateX(0);     /* End: normal position */
+    opacity: 1;                   /* End: fully visible */
   }
 }
 
+/* Heading styles in left panel */
 .login-left h2 {
-  font-weight: 700;
-  margin-bottom: 0.4rem;
+  font-weight: 700;       /* Bold heading */
+  margin-bottom: 0.4rem;  /* Small space below heading */
 }
 
+/* Paragraph styles in left panel */
 .login-left p {
-  font-size: 1.3rem;
+  font-size: 1.3rem;  /* Larger text for tagline/description */
 }
 
+/* Logo floating animation */
 .floating-logo {
-  width: 190px;
+  width: 190px;  /* Logo size */
+
+  /* Gentle swaying animation (5 seconds, infinite loop) */
   animation: gentleSway 5s ease-in-out infinite;
+
+  /* Drop shadow for depth */
   filter: drop-shadow(0 0 8px rgba(59, 13, 21, 0.5));
 }
 
+/* Gentle sway animation - creates floating effect for logo */
 @keyframes gentleSway {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(5px); }
-  50% { transform: translateX(0); }
-  75% { transform: translateX(-5px); }
+  0%, 100% { transform: translateX(0); }    /* Start/End: center */
+  25% { transform: translateX(5px); }       /* Quarter: move right 5px */
+  50% { transform: translateX(0); }         /* Half: back to center */
+  75% { transform: translateX(-5px); }      /* Three-quarter: move left 5px */
 }
 
+
+/* ----------------------------------------------------------------------------
+   LOGIN RIGHT SIDE - LOGIN FORM CONTAINER
+   ---------------------------------------------------------------------------- */
+
 .login-right {
-  flex: 1.3;
+  flex: 1.3;  /* Takes 130% width (wider than left side) */
+
+  /* Center the login form vertically and horizontally */
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--background-color);
+
+  background-color: var(--background-color); /* Soft pink tinted background */
 }
 
+/* Login form box styling */
 .login-box {
   width: 100%;
-  max-width: 380px;
-  border-radius: 15px;
-  border: none;
-  background-color: #ffffff;
+  max-width: 380px;       /* Limit width for readability */
+  border-radius: 15px;    /* Rounded corners */
+  border: none;           /* No border (shadow provides depth) */
+  background-color: #ffffff; /* Pure white for form background */
 }
 
+/* Heading inside login box */
 .login-box h3 {
-  color: #2c2c2c;
+  color: #2c2c2c;  /* Dark text for contrast against white */
 }
+
+
+/* ============================================================================
+   FORM CONTROLS - INPUTS, SELECTS, TEXTAREAS
+   ============================================================================
+   Styling for all form inputs throughout the application.
+   ============================================================================ */
 
 .form-control, .form-select {
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 0.65rem 0.75rem;
-  transition: all 0.3s ease;
+  border-radius: 8px;              /* Rounded corners */
+  border: 1px solid #ddd;          /* Light gray border */
+  padding: 0.65rem 0.75rem;        /* Comfortable padding */
+  transition: all 0.3s ease;       /* Smooth transition on focus */
 }
 
+/* Focus state for inputs - highlights when user clicks/tabs into input */
 .form-control:focus {
-  border-color: var(--primary-color);
+  border-color: var(--primary-color);  /* Pink border when focused */
+  /* Pink shadow glow around input when focused */
   box-shadow: 0 0 0 0.2rem rgba(212, 81, 125, 0.25);
 }
 
+/* Input group text (icons or text inside input groups) */
 .input-group-text {
-  background-color: var(--accent-color);
-  border: 1px solid var(--primary-color);
+  background-color: var(--accent-color);    /* Light pink background */
+  border: 1px solid var(--primary-color);   /* Pink border */
 }
+
+
+/* ----------------------------------------------------------------------------
+   PASSWORD TOGGLE BUTTON (SHOW/HIDE PASSWORD)
+   ---------------------------------------------------------------------------- */
 
 .password-toggle {
-  cursor: pointer;
-  background-color: var(--accent-color);
-  border: 1px solid var(--primary-color);
-  transition: all 0.2s ease;
+  cursor: pointer;                           /* Show hand cursor on hover */
+  background-color: var(--accent-color);     /* Light pink background */
+  border: 1px solid var(--primary-color);    /* Pink border */
+  transition: all 0.2s ease;                 /* Smooth hover transition */
 }
 
+/* Hover state - changes to darker pink when mouse hovers over */
 .password-toggle:hover {
-  background-color: var(--secondary-color);
-  color: white;
+  background-color: var(--secondary-color);  /* Darker pink on hover */
+  color: white;                              /* White text on hover */
 }
 
+
+/* ============================================================================
+   BUTTONS - PRIMARY, SECONDARY, DANGER, ETC.
+   ============================================================================
+   Consistent button styling across all pages.
+   Includes hover effects and color variants.
+   ============================================================================ */
+
+/* Base button styles (applies to all buttons) */
 .btn {
-  background-color: var(--secondary-color);
-  border: none;
-  border-radius: 8px;
-  color: white;
-  transition: all 0.3s ease;
+  background-color: var(--secondary-color);  /* Default pink background */
+  border: none;                              /* No border */
+  border-radius: 8px;                        /* Rounded corners */
+  color: white;                              /* White text */
+  transition: all 0.3s ease;                 /* Smooth transitions */
 }
 
+/* Button hover effect - applies to all buttons */
 .btn:hover {
-  background-color: var(--pink-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  color: white;
+  background-color: var(--pink-hover);  /* Darker pink on hover */
+  transform: translateY(-2px);          /* Lift button up 2px */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Add shadow for depth */
+  color: white;                         /* Keep text white */
 }
 
+/* Primary button variant (main actions) */
 .btn-primary {
-  background-color: var(--primary-color);
+  background-color: var(--primary-color);  /* Primary pink */
 }
 
 .btn-primary:hover {
-  background-color: var(--pink-hover);
+  background-color: var(--pink-hover);  /* Darker pink on hover */
 }
 
+/* Secondary button variant (less important actions) */
 .btn-secondary {
-  background-color: #9e9e9e;
+  background-color: #9e9e9e;  /* Gray */
 }
 
 .btn-secondary:hover {
-  background-color: #757575;
+  background-color: #757575;  /* Darker gray on hover */
 }
 
+/* Warning button variant (caution actions) */
 .btn-warning {
-  background-color: #ff9800;
+  background-color: #ff9800;  /* Orange */
 }
 
 .btn-warning:hover {
-  background-color: #f57c00;
+  background-color: #f57c00;  /* Darker orange on hover */
 }
 
+/* Info button variant (informational actions) */
 .btn-info {
-  background-color: #00bcd4;
+  background-color: #00bcd4;  /* Cyan/Turquoise */
 }
 
 .btn-info:hover {
-  background-color: #0097a7;
+  background-color: #0097a7;  /* Darker cyan on hover */
 }
 
+/* Danger button variant (destructive actions like delete) */
 .btn-danger {
-  background-color: #e91e63;
+  background-color: #e91e63;  /* Pink-red */
 }
 
 .btn-danger:hover {
-  background-color: #c2185b;
+  background-color: #c2185b;  /* Darker pink-red on hover */
 }
 
+/* Success button variant (positive actions like save) */
 .btn-success {
-  background-color: #4caf50;
+  background-color: #4caf50;  /* Green */
 }
 
 .btn-success:hover {
-  background-color: #7de282;
+  background-color: #7de282;  /* Lighter green on hover */
 }
 
+
+/* ============================================================================
+   RESPONSIVE DESIGN - MEDIA QUERIES
+   ============================================================================
+   Adjusts layout for tablets and mobile devices.
+   Breakpoints: 992px (tablet), 576px (mobile)
+   ============================================================================ */
+
+/* Tablet and smaller (992px and below) */
 @media (max-width: 992px) {
   .login-page {
-    flex-direction: column;
+    flex-direction: column;  /* Stack login sections vertically */
   }
 
   .login-left {
-    border-radius: 0;
-    padding: 3rem 1rem;
+    border-radius: 0;         /* Remove rounded corners on mobile */
+    padding: 3rem 1rem;       /* Reduce padding */
   }
 
   .login-right {
-    padding: 2rem 1rem;
+    padding: 2rem 1rem;       /* Add padding for mobile */
   }
 }
 
+/* Mobile devices (576px and below) */
 @media (max-width: 576px) {
   .login-box {
-    padding: 2rem 1.5rem !important;
+    padding: 2rem 1.5rem !important;  /* Reduce login box padding */
   }
 
   .login-left h2 {
-    font-size: 1.5rem;
+    font-size: 1.5rem;  /* Smaller heading on mobile */
   }
 
   .login-left p {
-    font-size: 0.95rem;
+    font-size: 0.95rem;  /* Smaller text on mobile */
   }
 }
 
+
+/* ============================================================================
+   NAVIGATION BAR (TOP NAVBAR)
+   ============================================================================
+   Top navigation bar with logo, menu items, and user dropdown.
+   Fixed at top of page on all internal pages.
+   ============================================================================ */
+
 .navbar {
+  /* Pink gradient background matching login page */
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);  /* Shadow for depth */
 }
 
+/* Brand/logo in navbar */
 .navbar-brand {
-  font-weight: 700;
-  font-size: 1.15rem;
-  display: flex;
-  align-items: center;
-  color: white !important;
+  font-weight: 700;      /* Bold text */
+  font-size: 1.15rem;    /* Slightly larger text */
+  display: flex;         /* Flexbox for logo + text alignment */
+  align-items: center;   /* Vertically center items */
+  color: white !important; /* White text */
 }
 
+/* Logo image in navbar */
 .navbar-brand img {
   height: 50px;
-  width: 50px; 
-  margin-right: 10px;
-  border-radius: 50%; 
-  object-fit: contain; 
-  background-color: rgba(245, 210, 210, 0.9); 
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); 
-  padding: 3px;
+  width: 50px;
+  margin-right: 10px;                         /* Space between logo and text */
+  border-radius: 50%;                         /* Circular logo */
+  object-fit: contain;                        /* Fit logo within circle */
+  background-color: rgba(245, 210, 210, 0.9); /* Light pink background */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);   /* Shadow for depth */
+  padding: 3px;                               /* Small padding inside circle */
 }
 
+/* Navigation links in navbar */
 .navbar-nav .nav-link {
-  color: #ffffff !important;
-  font-weight: 500;
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
+  color: #ffffff !important;  /* White text */
+  font-weight: 500;           /* Medium weight */
+  margin-right: 10px;         /* Space between links */
+  display: flex;              /* Flexbox for icon + text alignment */
+  align-items: center;        /* Vertically center icon and text */
 }
 
+/* Icons inside navigation links */
 .navbar-nav .nav-link i {
-  margin-right: 5px;
+  margin-right: 5px;  /* Space between icon and text */
 }
 
+/* Active navigation link (current page) */
 .navbar-nav .nav-link.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 5px;
-  padding: 5px 10px;
+  background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white background */
+  border-radius: 5px;                         /* Rounded corners */
+  padding: 5px 10px;                          /* Padding around active link */
 }
 
+/* Dropdown toggle button in navbar */
 .navbar .dropdown-toggle {
-  color: #fff !important;
+  color: #fff !important;  /* White text */
 }
 
+/* Badge (notification count) in navbar */
 .navbar .badge.bg-success {
-  font-size: 0.7rem;
-  margin-left: 4px;
+  font-size: 0.7rem;  /* Small badge text */
+  margin-left: 4px;   /* Space from text */
 }
 
+/* Dropdown menu styling */
 .dropdown-menu {
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;                      /* Rounded corners */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); /* Shadow for depth */
 }
 
+
+/* ============================================================================
+   DASHBOARD STYLES
+   ============================================================================
+   Styling for dashboard page elements: headers, cards, statistics.
+   ============================================================================ */
+
+/* Dashboard page header */
 .dashboard-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  display: flex;          /* Flexbox for icon + text alignment */
+  align-items: center;    /* Vertically center items */
+  margin-bottom: 1.5rem;  /* Space below header */
 }
 
+/* Dashboard headings */
 .dashboard-header h1, .dashboard-header h2 {
-  font-weight: 680;
-  color: var(--text-color);
-  margin-left: 10px;
+  font-weight: 680;                /* Semi-bold */
+  color: var(--text-color);        /* Dark gray */
+  margin-left: 10px;               /* Space from icon */
 }
 
+/* Pink text utility class */
 .text-pink {
-  color: var(--text-color);
+  color: var(--text-color);  /* Uses text color variable */
 }
+
+
+/* ============================================================================
+   CARDS (CONTENT CONTAINERS)
+   ============================================================================
+   Cards used throughout the application for grouping content.
+   ============================================================================ */
 
 .card {
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  border: none;                                 /* No border */
+  border-radius: 15px;                          /* Rounded corners */
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);    /* Subtle shadow */
 }
 
+/* Card title text */
 .card .card-title {
-  font-weight: 600;
+  font-weight: 600;  /* Semi-bold */
 }
 
+/* Card header (top section of card) */
 .card-header {
-  border-radius: 15px 15px 0 0 !important;
+  border-radius: 15px 15px 0 0 !important;  /* Rounded top corners only */
 }
 
+
+/* ============================================================================
+   BACKGROUND GRADIENT UTILITIES
+   ============================================================================
+   Reusable background gradient classes for cards and headers.
+   ============================================================================ */
+
+/* Primary pink gradient */
 .bg-pink {
   background: linear-gradient(135deg, #d4517d, #e8739a);
   color: white;
 }
 
+/* Dark pink gradient */
 .bg-dark-pink {
   background: linear-gradient(135deg, #c23d6a, #d4517d);
   color: white;
 }
 
+/* Light pink gradient (accent) */
 .bg-accent-pink {
   background: linear-gradient(135deg, #e8739a, #f5a3be);
   color: white;
 }
 
+/* Secondary gray background */
 .bg-secondary {
   background-color: #9e9e9e !important;
   color: white;
 }
 
+/* Role badge background (green) */
 .bg-role {
-  background-color: #4caf50;
+  background-color: #4caf50;  /* Green for staff roles */
   color: white;
 }
 
+
+/* ============================================================================
+   ALERTS (FLASH MESSAGES)
+   ============================================================================
+   Styling for success, error, warning, info messages.
+   ============================================================================ */
+
 .alert {
-  border-radius: 10px;
-  border: none;
+  border-radius: 10px;  /* Rounded corners */
+  border: none;         /* No border (color provided by Bootstrap classes) */
 }
+
+
+/* ============================================================================
+   TABLES (DATA TABLES)
+   ============================================================================
+   Styling for patient lists, staff lists, audit logs, etc.
+   ============================================================================ */
 
 .table {
-  color: var(--text-color);
+  color: var(--text-color);  /* Dark gray text */
 }
 
+/* Table header row */
 .table thead {
-  background-color: #f8f9fa;
+  background-color: #f8f9fa;  /* Light gray background */
 }
 
+/* Hover effect on table rows */
 .table-hover tbody tr:hover {
-  background-color: rgba(212, 81, 125, 0.05);
+  background-color: rgba(212, 81, 125, 0.05);  /* Light pink tint on hover */
 }
+
+
+/* ============================================================================
+   BADGES (STATUS INDICATORS)
+   ============================================================================
+   Small colored labels for roles, status, counts, etc.
+   ============================================================================ */
 
 .badge {
-  padding: 0.4em 0.6em;
-  border-radius: 6px;
+  padding: 0.4em 0.6em;  /* Padding inside badge */
+  border-radius: 6px;    /* Rounded corners */
 }
 
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================
+   Special-purpose classes used in specific contexts.
+   ============================================================================ */
+
+/* Read-only medical information display */
 .medical-info-readonly {
-  background-color: #f5f5f5;
-  border: 1px solid #e0e0e0;
-  padding: 0.65rem 0.75rem;
-  border-radius: 8px;
-  color: #666;
-  font-size: 0.95rem;
+  background-color: #f5f5f5;  /* Light gray background */
+  border: 1px solid #e0e0e0;  /* Gray border */
+  padding: 0.65rem 0.75rem;   /* Padding like input fields */
+  border-radius: 8px;         /* Rounded corners */
+  color: #666;                /* Gray text */
+  font-size: 0.95rem;         /* Slightly smaller text */
 }
 
+/* Clickable cards (dashboard statistics, etc.) */
 .card-clickable {
-  cursor: pointer;
-  transition: all 0.3s ease;
+  cursor: pointer;                /* Show hand cursor */
+  transition: all 0.3s ease;      /* Smooth hover animation */
 }
 
+/* Hover effect on clickable cards - lifts up and adds shadow */
 .card-clickable:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);                /* Lift up 5px */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);  /* Larger shadow */
 }
 
+/* Light table header with pink border */
 .table thead.table-light {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid var(--primary-color);
+  background-color: #f8f9fa;                  /* Light gray background */
+  border-bottom: 2px solid var(--primary-color); /* Pink border at bottom */
 }
+
+
+/* ============================================================================
+   END OF STYLESHEET
+   ============================================================================
+
+   TOTAL CLASSES: 40+
+   ANIMATIONS: 2 (slideInFrame, gentleSway)
+   RESPONSIVE BREAKPOINTS: 2 (992px, 576px)
+
+   BROWSER COMPATIBILITY:
+   - Chrome 90+
+   - Firefox 88+
+   - Safari 14+
+   - Edge 90+
+
+   MAINTENANCE NOTES:
+   - Update CSS variables in :root for theme changes
+   - Test responsive design at 1920px, 1366px, 768px, 375px
+   - Ensure all custom colors have sufficient contrast (WCAG AA)
+   ============================================================================ */
