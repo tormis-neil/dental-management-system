@@ -1,3 +1,13 @@
+{#
+================================================================================
+MY PROFILE - User Profile Management
+================================================================================
+Purpose: View and edit current user's profile information
+Extends: base.html
+Features: Update name/email, change password, view read-only fields (ID, username, role, status)
+Access: All authenticated users (own profile only)
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}My Profile - Dental Clinic{% endblock %}
@@ -7,13 +17,16 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow">
+                <!-- Card Header -->
                 <div class="card-header bg-pink text-white">
                     <h5 class="mb-0"><i class="bi bi-person-circle"></i> My Profile</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Profile Update Form -->
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        
+
+                        <!-- Read-Only Fields: User ID and Username -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted">User ID</label>
@@ -25,19 +38,21 @@
                             </div>
                         </div>
 
+                        <!-- Editable Fields: Full Name and Email -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="full_name" class="form-label text-muted">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" 
+                                <input type="text" class="form-control" id="full_name" name="full_name"
                                        value="{{ current_user.full_name or '' }}" required>
                             </div>
                             <div class="col-md-6">
                                 <label for="email" class="form-label text-muted">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" 
+                                <input type="email" class="form-control" id="email" name="email"
                                        value="{{ current_user.email or '' }}">
                             </div>
                         </div>
 
+                        <!-- Read-Only Fields: Role and Account Status -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label text-muted">Role</label>
@@ -59,6 +74,7 @@
 
                         <hr>
 
+                        <!-- Password Change Section (Optional) -->
                         <h6 class="text-muted mb-3">Change Password (Optional)</h6>
                         <div class="row mb-3">
                             <div class="col-md-6">
@@ -75,6 +91,7 @@
 
                         <hr>
 
+                        <!-- Form Action Buttons -->
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle"></i> Save Changes
