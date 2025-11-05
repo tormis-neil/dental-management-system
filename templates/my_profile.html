@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Dental Clinic{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-pink text-white">
+                    <h5 class="mb-0"><i class="bi bi-person-circle"></i> My Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">User ID</label>
+                                <input type="text" class="form-control" value="#{{ current_user.id }}" disabled>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Username</label>
+                                <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="full_name" class="form-label text-muted">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" 
+                                       value="{{ current_user.full_name or '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label text-muted">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ current_user.email or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Role</label>
+                                <div>
+                                    <span class="badge bg-role px-3 py-2">{{ current_user.role|upper }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Account Status</label>
+                                <div>
+                                    {% if current_user.is_active %}
+                                    <span class="badge bg-success px-3 py-2">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger px-3 py-2">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="text-muted mb-3">Change Password (Optional)</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="current_password" name="current_password">
+                                <small class="form-text text-muted">Required only if changing password</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="new_password" name="new_password">
+                                <small class="form-text text-muted">Leave blank to keep current password</small>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Save Changes
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

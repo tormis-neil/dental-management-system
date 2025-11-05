@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Dental Clinic{% endblock %}
+
+{% block content %}
+<div class="login-page d-flex">
+  <div class="login-left d-flex flex-column justify-content-center align-items-center text-center p-5">
+    <h2 class="fw-bold">Welcome to Dr. C Dental Clinic!</h2>
+    <p class="lead">Your trusted partner in oral health</p>
+    
+    <img src="{{ url_for('static', filename='images/dental_logo.png') }}" 
+         alt="Dental Logo" 
+         class="mb-4 floating-logo">
+  </div>
+
+  <div class="login-right d-flex justify-content-center align-items-center p-4">
+    <div class="card login-box shadow-lg p-4">
+      <h3 class="text-center fw-bold mb-3">Secure Login</h3>
+      <p class="text-center text-muted mb-4">Access the Patient Information System</p>
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="mb-3 text-start">
+          <label for="username" class="form-label">Username</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control" id="username" name="username" required autofocus>
+          </div>
+        </div>
+
+        <div class="mb-4 text-start">
+          <label for="password" class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+          <i class="bi bi-box-arrow-in-right"></i> Log in
+        </button>
+      </form>
+
+      <div class="mt-4 text-center text-muted small">
+        <i class="bi bi-shield-check"></i> Secure Access Only
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
