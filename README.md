@@ -73,8 +73,10 @@ A Flask-based web application for managing dental clinic patient records, staff,
 
 Before you begin, ensure you have the following installed:
 
-- **Python 3.11+** (check with `python3 --version`)
-- **pip** (Python package manager)
+- **Python 3.11+**
+  - **Windows:** Check with `py --version` or `python --version`
+  - **Mac/Linux:** Check with `python3 --version`
+- **pip** (Python package manager - usually included with Python)
 - **Git** (optional, for cloning)
 
 ---
@@ -93,9 +95,25 @@ cd dental-management-system
 
 ### Step 2: Install Dependencies
 
+**On Windows (PowerShell/Command Prompt):**
+```powershell
+# Install required Python packages
+py -m pip install -r requirements.txt
+```
+
+**On Mac/Linux:**
 ```bash
 # Install required Python packages
 pip3 install -r requirements.txt
+```
+
+**If you get "pip not found" on Windows:**
+```powershell
+# Try this instead:
+python -m pip install -r requirements.txt
+
+# Or use full path:
+C:\Users\YourUsername\AppData\Local\Programs\Python\Python313\python.exe -m pip install -r requirements.txt
 ```
 
 **Required packages (from requirements.txt):**
@@ -108,19 +126,31 @@ Werkzeug==3.0.1
 
 ### Step 3: Verify Installation
 
-```bash
-# Check if Flask is installed
-python3 -c "import flask; print(f'Flask {flask.__version__} installed!')"
+**On Windows:**
+```powershell
+py -c "import flask; print('Flask installed successfully!')"
 ```
 
-You should see: `Flask 3.0.0 installed!`
+**On Mac/Linux:**
+```bash
+python3 -c "import flask; print('Flask installed successfully!')"
+```
+
+You should see: `Flask installed successfully!`
 
 ---
 
 ## ▶️ Running the Application
 
-### Method 1: Direct Python Execution
+### Method 1: Direct Python Execution (Recommended)
 
+**On Windows:**
+```powershell
+# Run the application
+py app.py
+```
+
+**On Mac/Linux:**
 ```bash
 # Run the application
 python3 app.py
@@ -136,6 +166,17 @@ WARNING: This is a development server. Do not use it in a production deployment.
 
 ### Method 2: Using Flask CLI
 
+**On Windows:**
+```powershell
+# Set Flask app environment variable
+$env:FLASK_APP = "app.py"
+$env:FLASK_ENV = "development"
+
+# Run Flask
+py -m flask run
+```
+
+**On Mac/Linux:**
 ```bash
 # Set Flask app environment variable
 export FLASK_APP=app.py
@@ -277,9 +318,26 @@ Beautiful split-screen design with animated logo
 
 ## 🔧 Troubleshooting
 
-### Issue: "Module not found" error
+### Issue: "pip is not recognized" (Windows)
 
 **Solution:**
+```powershell
+# Use py launcher instead:
+py -m pip install -r requirements.txt
+
+# Or ensure pip:
+py -m ensurepip --upgrade
+```
+
+### Issue: "Module not found" error
+
+**Solution (Windows):**
+```powershell
+# Reinstall dependencies
+py -m pip install -r requirements.txt
+```
+
+**Solution (Mac/Linux):**
 ```bash
 # Reinstall dependencies
 pip3 install -r requirements.txt
@@ -287,7 +345,18 @@ pip3 install -r requirements.txt
 
 ### Issue: "Address already in use"
 
-**Solution:**
+**Solution (Windows):**
+```powershell
+# Find process using port 5000
+netstat -ano | findstr :5000
+
+# Kill the process (replace PID with actual process ID)
+taskkill /PID <PID> /F
+
+# Or restart your computer
+```
+
+**Solution (Mac/Linux):**
 ```bash
 # Kill process on port 5000
 lsof -ti:5000 | xargs kill -9
@@ -298,7 +367,14 @@ python3 app.py --port 5001
 
 ### Issue: Database errors
 
-**Solution:**
+**Solution (Windows):**
+```powershell
+# Delete and recreate database
+del dental_clinic.db
+py app.py  # Database will be recreated automatically
+```
+
+**Solution (Mac/Linux):**
 ```bash
 # Delete and recreate database
 rm dental_clinic.db
