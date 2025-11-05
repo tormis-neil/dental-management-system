@@ -1,12 +1,24 @@
+{#
+================================================================================
+BACKUP & RESTORE - Database Management (Manager Only)
+================================================================================
+Purpose: Create, download, and restore database backups
+Extends: base.html
+Features: Create new backup, view backup list, download backups, restore with confirmation
+Access: Manager only
+Note: Restore operation replaces all current data (confirmRestore() warns user)
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Backup & Restore - Dental Clinic{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Page Header -->
     <h2 class="mb-4"><i class="bi bi-database"></i> Backup & Restore</h2>
 
-    <!-- Create New Backup -->
+    <!-- Create New Backup Section -->
     <div class="row mb-4">
         <div class="col-md-12">
             <div class="card shadow">
@@ -19,7 +31,7 @@
                         staff accounts, and audit logs.
                     </p>
 
-                    <!-- CSRF token must be inside the form -->
+                    <!-- Create Backup Form (POST to /backup/create) -->
                     <form action="{{ url_for('create_backup') }}" method="post" class="d-inline">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-success">
@@ -31,7 +43,7 @@
         </div>
     </div>
 
-    <!-- Available Backups -->
+    <!-- Available Backups Section -->
     <div class="row">
         <div class="col-md-12">
             <div class="card shadow">
@@ -39,6 +51,7 @@
                     <h5 class="mb-0">Available Backups</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Backup List Table -->
                     <div class="table-responsive">
                         <table class="table table-hover align-middle">
                             <thead>
@@ -51,18 +64,21 @@
                             </thead>
                             <tbody>
                                 {% if backups %}
+                                    <!-- Loop through available backup files -->
                                     {% for backup in backups %}
                                     <tr>
                                         <td>{{ backup.filename }}</td>
                                         <td>{{ backup.created }}</td>
                                         <td>{{ (backup.size / 1024) | round(2) }} KB</td>
                                         <td>
-                                            <a href="{{ url_for('download_backup', filename=backup.filename) }}" 
+                                            <!-- Download Backup Button -->
+                                            <a href="{{ url_for('download_backup', filename=backup.filename) }}"
                                                class="btn btn-sm btn-primary" title="Download">
                                                 <i class="bi bi-download"></i> Download
                                             </a>
-                                            <form action="{{ url_for('restore_backup', filename=backup.filename) }}" 
-                                                  method="post" style="display:inline;" 
+                                            <!-- Restore Backup Form with JavaScript confirmation -->
+                                            <form action="{{ url_for('restore_backup', filename=backup.filename) }}"
+                                                  method="post" style="display:inline;"
                                                   onsubmit="return confirmRestore('{{ backup.filename }}');">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                                 <button type="submit" class="btn btn-sm btn-warning" title="Restore">
@@ -73,6 +89,7 @@
                                     </tr>
                                     {% endfor %}
                                 {% else %}
+                                    <!-- Empty State -->
                                     <tr>
                                         <td colspan="4" class="text-center text-muted">
                                             No backups available. Create your first backup above.
@@ -89,8 +106,10 @@
 </div>
 {% endblock %}
 
+<!-- JavaScript for Restore Confirmation -->
 {% block extra_js %}
 <script>
+// Confirm restore operation before replacing current data
 function confirmRestore(filename) {
     return confirm(`⚠️ WARNING: Restoring this backup will replace all current data!\n\nBackup file: ${filename}\n\nDo you want to continue?`);
 }

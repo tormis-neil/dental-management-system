@@ -1,3 +1,14 @@
+{#
+================================================================================
+SETTINGS - Account Settings Page
+================================================================================
+Purpose: Update user account settings (name and password)
+Extends: base.html
+Features: Edit full name, change password with validation (staffPassword class)
+Access: All authenticated users
+Note: staffForm class triggers password validation in script.js
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Settings - Dental Clinic{% endblock %}
@@ -7,13 +18,16 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card shadow-sm">
+                <!-- Card Header -->
                 <div class="card-header bg-pink text-white">
                     <h5 class="mb-0"><i class="bi bi-gear"></i> Account Settings</h5>
                 </div>
                 <div class="card-body">
+                    <!-- Settings Form (staffForm class triggers password validation) -->
                     <form method="POST" class="staffForm">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+                        <!-- Full Name Field -->
                         <div class="mb-3">
                             <label class="form-label">Full Name</label>
                             <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required>
@@ -21,12 +35,15 @@
 
                         <hr>
 
+                        <!-- Password Change Section -->
                         <h6>Change Password</h6>
+                        <!-- Current Password Field -->
                         <div class="mb-3">
                             <label class="form-label">Current Password</label>
                             <input type="password" name="current_password" class="form-control" placeholder="Enter current password">
                         </div>
 
+                        <!-- New Password Field (staffPassword class triggers validation) -->
                         <div class="mb-3">
                             <label for="new_password" class="form-label">New Password</label>
                             <input type="password" class="form-control staffPassword" id="new_password" name="new_password">
@@ -35,6 +52,7 @@
                             </small>
                         </div>
 
+                        <!-- Save Button -->
                         <div class="text-end">
                             <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Save Changes</button>
                         </div>

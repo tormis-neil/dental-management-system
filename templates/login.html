@@ -1,26 +1,43 @@
+{#
+===================================================================================================
+LOGIN PAGE - User Authentication
+================================================================================
+Purpose: Display login form and authenticate users
+Extends: base.html
+Features: Split-screen design, username/password fields, CSRF protection
+Access: Public (unauthenticated users only)
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Login - Dental Clinic{% endblock %}
 
 {% block content %}
+<!-- Split-screen login page: Left = branding, Right = login form -->
 <div class="login-page d-flex">
+  <!-- Left Panel: Welcome message and logo -->
   <div class="login-left d-flex flex-column justify-content-center align-items-center text-center p-5">
     <h2 class="fw-bold">Welcome to Dr. C Dental Clinic!</h2>
     <p class="lead">Your trusted partner in oral health</p>
-    
-    <img src="{{ url_for('static', filename='images/dental_logo.png') }}" 
-         alt="Dental Logo" 
+
+    <!-- Floating/swaying dental logo animation -->
+    <img src="{{ url_for('static', filename='images/dental_logo.png') }}"
+         alt="Dental Logo"
          class="mb-4 floating-logo">
   </div>
 
+  <!-- Right Panel: Login form card -->
   <div class="login-right d-flex justify-content-center align-items-center p-4">
     <div class="card login-box shadow-lg p-4">
       <h3 class="text-center fw-bold mb-3">Secure Login</h3>
       <p class="text-center text-muted mb-4">Access the Patient Information System</p>
 
+      <!-- Login Form: POST to /login route -->
       <form method="POST" action="{{ url_for('login') }}">
+        <!-- CSRF token for security (prevents cross-site request forgery) -->
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+        <!-- Username Field -->
         <div class="mb-3 text-start">
           <label for="username" class="form-label">Username</label>
           <div class="input-group">
@@ -29,6 +46,7 @@
           </div>
         </div>
 
+        <!-- Password Field (password toggle added by script.js) -->
         <div class="mb-4 text-start">
           <label for="password" class="form-label">Password</label>
           <div class="input-group">
@@ -37,11 +55,13 @@
           </div>
         </div>
 
+        <!-- Submit Button -->
         <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
           <i class="bi bi-box-arrow-in-right"></i> Log in
         </button>
       </form>
 
+      <!-- Security badge -->
       <div class="mt-4 text-center text-muted small">
         <i class="bi bi-shield-check"></i> Secure Access Only
       </div>

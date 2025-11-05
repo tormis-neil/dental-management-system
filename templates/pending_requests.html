@@ -1,9 +1,21 @@
+{#
+================================================================================
+PENDING REQUESTS - Patient Deletion Approval Page (Manager Only)
+================================================================================
+Purpose: View and manage patient deletion requests from staff
+Extends: base.html
+Features: Search requests, approve/deny actions, confirmation dialogs
+Access: Manager only
+Note: Staff can request patient deletion; managers must approve/deny
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Pending Requests - Dental Clinic{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
+    <!-- Page Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-exclamation-triangle text-danger"></i> Pending Deletion Requests</h2>
         <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
@@ -13,6 +25,7 @@
 
     <div class="card shadow">
         <div class="card-body">
+            <!-- Search Form (GET request, filters by patient name or request ID) -->
             <form method="GET" class="mb-3">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -20,6 +33,7 @@
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control" name="search" placeholder="Search by patient name or request ID..." value="{{ search }}">
                             <button class="btn btn-outline-primary" type="submit">Search</button>
+                            <!-- Clear Button (shown only when search is active) -->
                             {% if search %}
                             <a href="{{ url_for('pending_requests_view') }}" class="btn btn-outline-secondary">Clear</a>
                             {% endif %}
@@ -28,6 +42,7 @@
                 </div>
             </form>
 
+            <!-- Pending Requests Table -->
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
@@ -43,6 +58,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Loop through pending deletion requests -->
                         {% for req in requests %}
                         <tr>
                             <td><strong>#{{ req.id }}</strong></td>
@@ -53,12 +69,14 @@
                             <td><small>{{ req.requested_at }}</small></td>
                             <td><span class="badge bg-danger">{{ req.status|upper }}</span></td>
                             <td>
+                                <!-- Approve Form with JavaScript confirmation -->
                                 <form action="{{ url_for('approve_request', request_id=req.id) }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button class="btn btn-sm btn-success" type="submit" onclick="return confirm('Approve deletion of patient {{ req.first_name }} {{ req.last_name }}?')">
                                         <i class="bi bi-check-circle"></i> Approve
                                     </button>
                                 </form>
+                                <!-- Deny Form -->
                                 <form action="{{ url_for('deny_request', request_id=req.id) }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button class="btn btn-sm btn-danger" type="submit">
@@ -68,6 +86,7 @@
                             </td>
                         </tr>
                         {% else %}
+                        <!-- Empty State -->
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4">
                                 <i class="bi bi-inbox display-4"></i>
