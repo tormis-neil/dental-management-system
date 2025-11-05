@@ -1,51 +1,85 @@
+{#
+================================================================================
+BASE TEMPLATE - Main Layout for All Pages
+================================================================================
+Purpose: Provides consistent layout, navigation, and structure for all pages
+Extends: None (this is the master template)
+Blocks: title, content, extra_js
+Used by: All other templates extend this base
+================================================================================
+#}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Meta tags for responsive design and character encoding -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Page title - can be overridden by child templates -->
     <title>{% block title %}Dental Clinic Patient Information System{% endblock %}</title>
+
+    <!-- External CSS: Bootstrap 5.3.0 framework -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons for UI elements -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom stylesheet for pink theme and custom styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    {# ========================================================================
+       NAVIGATION BAR - Only shown for authenticated users
+       ======================================================================== #}
     {% if current_user.is_authenticated %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
+            <!-- Logo and Brand Name -->
             <a class="navbar-brand d-flex align-items-center" href="{{ url_for('dashboard') }}">
-                <img src="{{ url_for('static', filename='images/dental_logo_dashboard.png') }}" 
+                <img src="{{ url_for('static', filename='images/dental_logo_dashboard.png') }}"
                      alt="Dental Logo" class="navbar-logo me-2">
                 <span>Dr. C Dental Clinic</span>
             </a>
 
+            <!-- Mobile menu toggle button -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Left-side navigation menu -->
                 <ul class="navbar-nav me-auto">
+                    <!-- Dashboard link - available to all users -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
                     </li>
+
+                    <!-- Patients link - available to all users -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint in ['patients', 'add_patient', 'edit_patient', 'view_patient'] %}active{% endif %}" href="{{ url_for('patients') }}">
                             <i class="bi bi-people"></i> Patients
                         </a>
                     </li>
+
+                    <!-- Staff link - ONLY for managers -->
                     {% if current_user.is_manager() %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint in ['staff', 'add_staff', 'edit_staff'] %}active{% endif %}" href="{{ url_for('staff') }}">
                             <i class="bi bi-person-badge"></i> Staff
                         </a>
                     </li>
+
+                    <!-- Backup link - ONLY for managers -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'backup' %}active{% endif %}" href="{{ url_for('backup') }}">
                             <i class="bi bi-database"></i> Backup
                         </a>
                     </li>
                     {% endif %}
+
+                    <!-- Audit Logs link - available to all users (shows only own logs for non-managers) -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'audit_logs' %}active{% endif %}" href="{{ url_for('audit_logs') }}">
                             <i class="bi bi-clipboard-data"></i> Audit Logs
@@ -53,12 +87,16 @@
                     </li>
                 </ul>
 
+                <!-- Right-side user dropdown menu -->
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
+                        <!-- User profile dropdown toggle -->
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="bi bi-person-circle"></i> {{ current_user.full_name }}
                             <span class="badge bg-role">{{ current_user.role|upper }}</span>
                         </a>
+
+                        <!-- Dropdown menu items -->
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
                             <li>
@@ -84,7 +122,11 @@
     </nav>
     {% endif %}
 
+    {# ========================================================================
+       MAIN CONTENT AREA
+       ======================================================================== #}
     <div class="{% if current_user.is_authenticated %}container-fluid mt-4{% endif %}">
+        {# Flash Messages - Success, error, warning, info messages #}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -96,11 +138,20 @@
             {% endif %}
         {% endwith %}
 
+        {# Content block - Child templates inject their content here #}
         {% block content %}{% endblock %}
     </div>
 
+    {# ========================================================================
+       JAVASCRIPT LIBRARIES
+       ======================================================================== #}
+    <!-- Bootstrap 5 JavaScript (includes Popper.js for dropdowns/tooltips) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript for interactivity (alerts, password toggle, etc.) -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <!-- Extra JavaScript block - Child templates can add page-specific scripts -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>

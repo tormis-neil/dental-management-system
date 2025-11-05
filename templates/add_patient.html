@@ -1,41 +1,59 @@
+{#
+================================================================================
+ADD PATIENT - New Patient Registration Form
+================================================================================
+Purpose: Form to add a new patient to the system
+Extends: base.html
+Features: Basic info, emergency contact, medical information (role-based)
+Access: All authenticated users
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Add Patient - Dental Clinic{% endblock %}
 
 {% block content %}
 <div class="container">
+    <!-- Page Header with Back Button -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-person-plus"></i> Add New Patient</h2>
         <a href="{{ url_for('patients') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back to Patients
         </a>
     </div>
-    
+
     <div class="card shadow">
         <div class="card-body">
+            <!-- Add Patient Form (POST to /patients/add) -->
             <form method="POST" action="{{ url_for('add_patient') }}">
+                <!-- CSRF Protection -->
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                
+
+                <!-- Basic Information Section -->
                 <h5 class="mb-3"><i class="bi bi-person-badge"></i> Basic Information</h5>
-                
+
                 <div class="row">
+                    <!-- First Name (Required) -->
                     <div class="col-md-6 mb-3">
                         <label for="first_name" class="form-label">First Name</label>
                         <input type="text" class="form-control" id="first_name" name="first_name" required>
                     </div>
-                    
+
+                    <!-- Last Name (Required) -->
                     <div class="col-md-6 mb-3">
                         <label for="last_name" class="form-label">Last Name</label>
                         <input type="text" class="form-control" id="last_name" name="last_name" required>
                     </div>
                 </div>
-                
+
                 <div class="row">
+                    <!-- Date of Birth -->
                     <div class="col-md-4 mb-3">
                         <label for="date_of_birth" class="form-label">Date of Birth</label>
                         <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
                     </div>
-                    
+
+                    <!-- Gender Dropdown -->
                     <div class="col-md-4 mb-3">
                         <label for="gender" class="form-label">Gender</label>
                         <select class="form-select" id="gender" name="gender">
@@ -45,67 +63,81 @@
                             <option value="Other">Other</option>
                         </select>
                     </div>
-                    
+
+                    <!-- Phone Number -->
                     <div class="col-md-4 mb-3">
                         <label for="phone" class="form-label">Phone</label>
                         <input type="tel" class="form-control" id="phone" name="phone">
                     </div>
                 </div>
-                
+
                 <div class="row">
+                    <!-- Email Address -->
                     <div class="col-md-6 mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" name="email">
                     </div>
-                    
+
+                    <!-- Home Address -->
                     <div class="col-md-6 mb-3">
                         <label for="address" class="form-label">Address</label>
                         <input type="text" class="form-control" id="address" name="address">
                     </div>
                 </div>
-                
+
+                <!-- Emergency Contact Section -->
                 <h5 class="mt-4 mb-3"><i class="bi bi-telephone-plus"></i> Emergency Contact</h5>
-                
+
                 <div class="row">
+                    <!-- Emergency Contact Name -->
                     <div class="col-md-6 mb-3">
                         <label for="emergency_contact_name" class="form-label">Emergency Contact Name</label>
                         <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name">
                     </div>
-                    
+
+                    <!-- Emergency Contact Phone -->
                     <div class="col-md-6 mb-3">
                         <label for="emergency_contact_phone" class="form-label">Emergency Contact Phone</label>
                         <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone">
                     </div>
                 </div>
-                
+
+                <!-- Medical Information Section (Manager/Dentist only) -->
                 {% if current_user.is_manager() or current_user.is_dentist() or current_user.is_admin() %}
                 <h5 class="mt-4 mb-3"><i class="bi bi-heart-pulse"></i> Medical Information</h5>
-                
+
+                <!-- Allergies -->
                 <div class="mb-3">
                     <label for="allergies" class="form-label">Allergies</label>
                     <textarea class="form-control" id="allergies" name="allergies" rows="2"></textarea>
                 </div>
 
+                <!-- Existing Medical Conditions -->
                 <div class="mb-3">
                     <label for="existing_condition" class="form-label">Existing Conditions</label>
                     <textarea class="form-control" id="existing_condition" name="existing_condition" rows="2"></textarea>
                 </div>
 
+                <!-- Dentist Notes/Diagnosis -->
                 <div class="mb-3">
                     <label for="dentist_notes" class="form-label">Dentist Notes / Diagnosis</label>
                     <textarea class="form-control" id="dentist_notes" name="dentist_notes" rows="2"></textarea>
                 </div>
 
+                <!-- Assigned Dentist -->
                 <div class="mb-3">
                     <label for="assigned_dentist" class="form-label">Assigned Dentist</label>
                     <input type="text" name="full_name" class="form-control" value="{{ current_user.full_name }}" required>
                 </div>
+
                 {% else %}
+                <!-- Info Alert for Staff Members (cannot add medical info) -->
                 <div class="alert alert-info mt-4">
                     <i class="bi bi-info-circle"></i> <strong>Note:</strong> As a staff member, medical information can only be added by dentists or managers. The assigned dentist will be automatically set to you.
                 </div>
                 {% endif %}
-                
+
+                <!-- Form Action Buttons -->
                 <div class="d-flex justify-content-end gap-2 mt-4">
                     <a href="{{ url_for('patients') }}" class="btn btn-secondary">Cancel</a>
                     <button type="submit" class="btn btn-primary">

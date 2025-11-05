@@ -1,14 +1,27 @@
+{#
+================================================================================
+DASHBOARD - Main Overview Page
+================================================================================
+Purpose: Display system statistics, recent activities, and pending requests
+Extends: base.html
+Features: Statistics cards, recent patients/activities tables, manager-specific sections
+Access: All authenticated users (some sections manager-only)
+================================================================================
+#}
 {% extends "base.html" %}
 
 {% block title %}Dashboard - Dental Clinic{% endblock %}
 
 {% block content %}
+<!-- Page Header with Pending Requests Button (manager only) -->
 <div class="dashboard-header d-flex align-items-center mb-4">
   <h2 class="mb-0 text-pink"><i class="bi bi-speedometer2"></i> Dashboard</h2>
-  
+
+  <!-- Pending Requests Button: Only visible to managers -->
   {% if current_user.is_manager() %}
   <a href="{{ url_for('pending_requests_view') }}" class="btn btn-outline-danger position-relative ms-3">
     <i class="bi bi-exclamation-triangle"></i> Pending Requests
+    <!-- Badge showing count of pending deletion requests -->
     {% if total_pending_count > 0 %}
     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
       {{ total_pending_count }}
@@ -20,7 +33,9 @@
 </div>
 
 <div class="container-fluid dashboard-container">
+  <!-- Statistics Cards Row -->
   <div class="row mb-4">
+    <!-- Total Patients Card (clickable, navigates to patients list) -->
     <div class="col-md-3">
       <a href="{{ url_for('patients') }}" class="text-decoration-none">
         <div class="card bg-pink text-white shadow card-clickable">
@@ -39,6 +54,7 @@
       </a>
     </div>
 
+    <!-- Staff Members Card (manager only, clickable) -->
     {% if current_user.is_manager() %}
     <div class="col-md-3">
       <a href="{{ url_for('staff') }}" class="text-decoration-none">
@@ -59,6 +75,7 @@
     </div>
     {% endif %}
 
+    <!-- Current User Role Card (non-clickable, informational) -->
     <div class="col-md-3">
       <div class="card bg-accent-pink text-white shadow">
         <div class="card-body">
@@ -76,6 +93,7 @@
     </div>
   </div>
 
+  <!-- Pending Deletion Requests Section (manager only, top 3 recent requests) -->
   {% if current_user.is_manager() and pending_requests %}
   <div class="row mt-4">
     <div class="col-md-12">
@@ -95,16 +113,19 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Loop through pending deletion requests -->
                 {% for request in pending_requests %}
                 <tr>
                   <td>{{ request['first_name'] }} {{ request['last_name'] }}</td>
                   <td>{{ request['requested_by_name'] }}</td>
                   <td><small>{{ request['requested_at'] }}</small></td>
                   <td>
+                    <!-- Approve Form -->
                     <form action="{{ url_for('approve_request', request_id=request['id']) }}" method="POST" style="display:inline;">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="btn btn-success btn-sm" type="submit">Approve</button>
                     </form>
+                    <!-- Deny Form -->
                     <form action="{{ url_for('deny_request', request_id=request['id']) }}" method="POST" style="display:inline;">
                       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                       <button class="btn btn-danger btn-sm" type="submit">Deny</button>
@@ -114,6 +135,7 @@
                 {% endfor %}
               </tbody>
             </table>
+            <!-- Link to view all pending requests if more than 3 exist -->
             {% if total_pending_count > 3 %}
             <div class="text-end">
               <a href="{{ url_for('pending_requests_view') }}" class="btn btn-sm btn-outline-danger">View All Pending Requests</a>
@@ -126,7 +148,9 @@
   </div>
   {% endif %}
 
+  <!-- Two-Column Layout: Recent Activities + Recent Patients -->
   <div class="row mt-4">
+    <!-- Recent Activities Table (left column) -->
     <div class="col-md-6">
       <div class="card shadow">
         <div class="card-header bg-white">
@@ -143,6 +167,7 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Loop through recent audit log activities (last 5) -->
                 {% for activity in recent_activities %}
                 <tr>
                   <td>{{ activity.username }}</td>
@@ -150,6 +175,7 @@
                   <td><small>{{ activity.timestamp }}</small></td>
                 </tr>
                 {% else %}
+                <!-- Show message if no activities found -->
                 <tr>
                   <td colspan="3" class="text-center text-muted">No recent activities</td>
                 </tr>
@@ -161,6 +187,7 @@
       </div>
     </div>
 
+    <!-- Recent Patients Table (right column) -->
     <div class="col-md-6">
       <div class="card shadow">
         <div class="card-header bg-white">
@@ -177,6 +204,7 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- Loop through recently added patients (last 5) -->
                 {% for patient in recent_patients %}
                 <tr>
                   <td>{{ patient.first_name }} {{ patient.last_name }}</td>
@@ -184,6 +212,7 @@
                   <td><small>{{ patient.created_at }}</small></td>
                 </tr>
                 {% else %}
+                <!-- Show message if no patients found -->
                 <tr>
                   <td colspan="3" class="text-center text-muted">No patients yet</td>
                 </tr>
