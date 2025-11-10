@@ -7,7 +7,7 @@ PURPOSE:
     common operations here.
 
 WHAT IT CONTAINS:
-    1. Decorators: Functions that modify other functions (e.g., @manager_required)
+    1. Decorators: Functions that modify other functions (e.g., @owner_required)
     2. Activity Logging: Track all user actions for security and auditing
     3. Database Backup/Restore: Create and restore database copies
     4. Helper Functions: Reusable utility functions (age calculation, etc.)
@@ -47,26 +47,26 @@ from models import get_db_connection  # Database connection function
 # They're used to restrict access to certain routes based on user role.
 # ==============================================================================
 
-def manager_required(f):
+def owner_required(f):
     """
-    Decorator to restrict route access to managers only.
+    Decorator to restrict route access to owners only.
 
     PURPOSE:
-        Ensures only users with 'manager' role can access certain routes.
+        Ensures only users with 'owner' role can access certain routes.
         Used on routes like /staff, /backup, /pending_requests.
 
     HOW IT WORKS:
         1. Wraps the original function with a new function
-        2. Before calling original function, checks if user is manager
-        3. If not manager: Show error message and redirect to dashboard
-        4. If manager: Call the original function normally
+        2. Before calling original function, checks if user is owner
+        3. If not owner: Show error message and redirect to dashboard
+        4. If owner: Call the original function normally
 
     USAGE:
         @app.route("/staff")
         @login_required          # First check if logged in
-        @manager_required        # Then check if manager
+        @owner_required          # Then check if owner
         def staff():
-            # Only managers can reach this code
+            # Only owners can reach this code
             pass
 
     PARAMETERS:
@@ -78,23 +78,23 @@ def manager_required(f):
     EXAMPLE:
         Without decorator (repetitive):
             def staff():
-                if not current_user.is_manager():
+                if not current_user.is_owner():
                     flash("Access denied")
                     return redirect(url_for("dashboard"))
                 # Staff management code here
 
         With decorator (clean):
-            @manager_required
+            @owner_required
             def staff():
                 # Staff management code here
     """
     @wraps(f)  # Preserves original function's name and docstring
     def decorated_function(*args, **kwargs):
         # Check 1: Is user authenticated? (logged in)
-        # Check 2: Does user have manager role?
-        if not current_user.is_authenticated or not current_user.is_manager():
+        # Check 2: Does user have owner role?
+        if not current_user.is_authenticated or not current_user.is_owner():
             # User is not authorized - show error message
-            flash("Access denied. Manager privileges required.", "danger")
+            flash("Access denied. Owner privileges required.", "danger")
             # Redirect to safe page (dashboard)
             return redirect(url_for("dashboard"))
 
@@ -515,7 +515,7 @@ def calculate_age(date_of_birth: str):
 FUNCTIONS PROVIDED:
 
 DECORATORS:
-    - manager_required: Restrict route to managers
+    - owner_required: Restrict route to owners
     - login_required_custom: Restrict route to authenticated users
 
 LOGGING:
@@ -534,7 +534,7 @@ USAGE PATTERNS:
 1. Route Protection:
     @app.route("/staff")
     @login_required
-    @manager_required
+    @owner_required
     def staff():
         pass
 

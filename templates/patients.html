@@ -99,8 +99,8 @@ Access: All authenticated users
                                     <i class="bi bi-pencil"></i>
                                 </a>
 
-                                <!-- Delete Button (Manager/Dentist can delete directly) -->
-                                {% if current_user.is_manager() or current_user.is_dentist() %}
+                                <!-- Delete Button (Owner/Dentist can delete directly) -->
+                                {% if current_user.is_owner() or current_user.is_dentist() %}
                                 <form action="{{ url_for('delete_patient', patient_id=patient.id) }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Delete patient {{ patient.first_name }} {{ patient.last_name }}?')">
@@ -108,7 +108,7 @@ Access: All authenticated users
                                     </button>
                                 </form>
 
-                                <!-- Request Delete Button (Staff must request manager approval) -->
+                                <!-- Request Delete Button (Staff must request owner approval) -->
                                 {% elif current_user.is_staff() %}
                                 <form action="{{ url_for('request_delete_patient', patient_id=patient.id) }}" method="POST" style="display:inline;">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
