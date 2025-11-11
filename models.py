@@ -11,7 +11,7 @@ WHAT IT CONTAINS:
     2. Database Schema: Table definitions for users, patients, audit_logs, pending_requests
     3. User Class: Handles authentication, authorization, and user operations
     4. PendingRequest Class: Manages deletion approval workflow
-    5. Initialization: Creates tables and default manager account on startup
+    5. Initialization: Creates tables and default owner account on startup
 
 WHY THIS APPROACH:
     - Separation of Concerns: Database logic separate from business logic (app.py)
@@ -27,10 +27,10 @@ DEPENDENCIES:
     - typing: For type hints (Optional, annotations)
 
 DATABASE SCHEMA:
-    - users: Staff accounts (manager, dentist, staff)
+    - users: Staff accounts (owner, dentist, staff)
     - patients: Patient information and medical records
     - audit_logs: Activity tracking for compliance and security
-    - pending_requests: Deletion approval workflow (staff requests, manager approves)
+    - pending_requests: Deletion approval workflow (staff requests, owner approves)
 """
 
 # ==============================================================================
@@ -152,9 +152,9 @@ def init_db() -> None:
             -- Optional: User's email address
             email TEXT,
 
-            -- Role determines permissions: manager > dentist/staff
+            -- Role determines permissions: owner > dentist/staff
             -- CHECK constraint ensures only valid roles can be inserted
-            role TEXT NOT NULL CHECK(role IN ('manager','staff','dentist','admin')),
+            role TEXT NOT NULL CHECK(role IN ('owner','staff','dentist','admin')),
 
             -- Soft delete flag: 0 = deactivated, 1 = active
             is_active INTEGER DEFAULT 1,
@@ -226,8 +226,8 @@ def init_db() -> None:
         -- =====================================================================
         -- PENDING_REQUESTS TABLE: Deletion approval workflow
         -- =====================================================================
-        -- PURPOSE: Staff can request patient deletion, but only managers can approve
-        -- WORKFLOW: Staff → Request → Manager → Approve/Deny → Delete
+        -- PURPOSE: Staff can request patient deletion, but only owners can approve
+        -- WORKFLOW: Staff → Request → Owner → Approve/Deny → Delete
         CREATE TABLE IF NOT EXISTS pending_requests (
             -- Primary key
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -245,7 +245,7 @@ def init_db() -> None:
             -- When the request was created
             requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-            -- Which manager approved/denied the request
+            -- Which owner approved/denied the request
             approved_by INTEGER,
 
             -- When the request was approved/denied
@@ -285,25 +285,25 @@ class User(UserMixin):
         id (int): Unique user identifier (primary key)
         username (str): Login username
         password_hash (str): Hashed password (NEVER stored in plaintext)
-        role (str): User role (manager, dentist, staff, admin)
+        role (str): User role (owner, dentist, staff, admin)
         full_name (Optional[str]): Display name
         email (Optional[str]): Email address
         is_active_flag (int): 1 = active, 0 = deactivated
 
     ROLES AND PERMISSIONS:
-        - manager: Full access (add/edit/delete staff, approve deletions, backups)
+        - owner: Full access (add/edit/delete staff, approve deletions, backups)
         - dentist: Add/edit/view patients, request deletions
         - staff: Add/edit/view patients, request deletions
         - admin: Future use (currently unused)
 
     USAGE EXAMPLE:
         # Authenticate user
-        user = User.get_by_username("manager")
+        user = User.get_by_username("owner")
         if user and user.verify_password("12345"):
             login_user(user)  # Start session
 
         # Check permissions
-        if user.is_manager():
+        if user.is_owner():
             # Allow access to staff management
             pass
     """
@@ -325,7 +325,7 @@ class User(UserMixin):
             id: Unique user identifier from database
             username: Login username
             password_hash: Hashed password (never plaintext!)
-            role: User role (manager/dentist/staff/admin)
+            role: User role (owner/dentist/staff/admin)
             full_name: Optional display name
             email: Optional email address
             is_active: 1 if active, 0 if deactivated
@@ -389,19 +389,19 @@ class User(UserMixin):
     # Used in decorators (utils.py) and templates to control access.
     # ==========================================================================
 
-    def is_manager(self) -> bool:
+    def is_owner(self) -> bool:
         """
-        Check if user has manager role.
+        Check if user has owner role.
 
         RETURNS:
-            bool: True if role is 'manager', False otherwise
+            bool: True if role is 'owner', False otherwise
 
         USAGE:
-            if current_user.is_manager():
+            if current_user.is_owner():
                 # Show staff management menu
                 pass
         """
-        return self.role == "manager"
+        return self.role == "owner"
 
     def is_staff(self) -> bool:
         """
@@ -460,7 +460,7 @@ class User(UserMixin):
             - Plaintext password never stored or logged
 
         USAGE:
-            user = User.get_by_username("manager")
+            user = User.get_by_username("owner")
             if user and user.verify_password("12345"):
                 # Password correct - log in user
                 login_user(user)
@@ -585,7 +585,7 @@ class User(UserMixin):
         PARAMETERS:
             username (str): Unique login username
             password (str): Plaintext password (will be hashed before storing)
-            role (str): User role (manager, dentist, staff)
+            role (str): User role (owner, dentist, staff)
             full_name (str): Display name
             email (str): Email address
 
@@ -603,7 +603,7 @@ class User(UserMixin):
             - Caught and returns False instead of crashing
 
         USAGE:
-            # In staff management route (manager only)
+            # In staff management route (owner only)
             success = User.create_user(
                 username="john_dentist",
                 password="secure_password",
@@ -663,7 +663,7 @@ class User(UserMixin):
 
         RETURNS:
             dict[int, str]: Dictionary mapping user ID to username
-                           Example: {1: "manager", 2: "john_dentist", 3: "jane_staff"}
+                           Example: {1: "owner", 2: "john_dentist", 3: "jane_staff"}
 
         TECHNICAL DETAILS:
             - Uses dynamic placeholders: ','.join('?' for _ in user_ids)
@@ -674,7 +674,7 @@ class User(UserMixin):
             # Get usernames for audit log display
             user_ids = [1, 2, 3, 5, 7]
             username_map = User.get_users_by_ids(user_ids)
-            # Result: {1: "manager", 2: "dentist1", 3: "staff1", ...}
+            # Result: {1: "owner", 2: "dentist1", 3: "staff1", ...}
         """
         # Handle empty list (return empty dict)
         if not user_ids:
@@ -708,7 +708,7 @@ class PendingRequest:
     PURPOSE:
         Implements two-step deletion process:
         1. Staff/Dentist requests deletion → Status: pending
-        2. Manager approves/denies → Status: approved/denied
+        2. Owner approves/denies → Status: approved/denied
         3. If approved, patient is deleted from database
 
     WHY THIS APPROACH:
@@ -718,7 +718,7 @@ class PendingRequest:
 
     WORKFLOW:
         Staff clicks "Request Delete" → create(patient_id, staff_id)
-        Manager sees pending request → approve(request_id, manager_id) OR deny(request_id, manager_id)
+        Owner sees pending request → approve(request_id, owner_id) OR deny(request_id, owner_id)
         If approved → app.py deletes patient and request record
 
     DESIGN PATTERN:
@@ -750,7 +750,7 @@ class PendingRequest:
             # In patient edit page (staff user)
             if request.method == "POST" and "request_delete" in request.form:
                 PendingRequest.create(patient_id, current_user.id)
-                flash("Deletion request submitted to manager")
+                flash("Deletion request submitted to owner")
         """
         with get_db_connection() as conn:
             conn.execute(
@@ -765,7 +765,7 @@ class PendingRequest:
         Fetch all pending deletion requests with patient and requester information.
 
         PURPOSE:
-            Display pending requests to manager for approval/denial.
+            Display pending requests to owner for approval/denial.
             Joins three tables to get complete information.
 
         HOW IT WORKS:
@@ -794,7 +794,7 @@ class PendingRequest:
                 - requested_by_name: Username of requester
 
         USAGE:
-            # In pending requests page (manager only)
+            # In pending requests page (owner only)
             pending = PendingRequest.get_all_pending()
             for request in pending:
                 print(f"{request['requested_by_name']} wants to delete "
@@ -819,33 +819,33 @@ class PendingRequest:
     @staticmethod
     def approve(request_id: int, approved_by: int) -> None:
         """
-        Approve a deletion request (manager only).
+        Approve a deletion request (owner only).
 
         PURPOSE:
-            Manager approves the deletion request.
+            Owner approves the deletion request.
             After this, app.py will delete the actual patient record.
 
         HOW IT WORKS:
             1. Update pending_requests table
             2. Set status to 'approved'
-            3. Record who approved (approved_by = manager's user ID)
+            3. Record who approved (approved_by = owner's user ID)
             4. Record when approved (approved_at = current timestamp)
 
         PARAMETERS:
             request_id (int): ID of the request to approve
-            approved_by (int): User ID of the manager approving
+            approved_by (int): User ID of the owner approving
 
         RETURNS:
             None: No return value (updates database record)
 
         WORKFLOW:
-            1. Manager clicks "Approve" button
+            1. Owner clicks "Approve" button
             2. This method updates status to 'approved'
             3. app.py deletes the patient from database
             4. app.py deletes the approved request record (cleanup)
 
         USAGE:
-            # In approve request route (manager only)
+            # In approve request route (owner only)
             PendingRequest.approve(request_id, current_user.id)
             # Then delete patient from database
             conn.execute("DELETE FROM patients WHERE id = ?", (patient_id,))
@@ -864,10 +864,10 @@ class PendingRequest:
     @staticmethod
     def deny(request_id: int, approved_by: int) -> None:
         """
-        Deny a deletion request (manager only).
+        Deny a deletion request (owner only).
 
         PURPOSE:
-            Manager denies the deletion request.
+            Owner denies the deletion request.
             Patient record remains in database.
 
         HOW IT WORKS:
@@ -875,19 +875,19 @@ class PendingRequest:
 
         PARAMETERS:
             request_id (int): ID of the request to deny
-            approved_by (int): User ID of the manager denying
+            approved_by (int): User ID of the owner denying
 
         RETURNS:
             None: No return value (updates database record)
 
         WORKFLOW:
-            1. Manager clicks "Deny" button
+            1. Owner clicks "Deny" button
             2. This method updates status to 'denied'
             3. Request remains in database (for audit purposes)
             4. Patient remains in database (not deleted)
 
         USAGE:
-            # In deny request route (manager only)
+            # In deny request route (owner only)
             PendingRequest.deny(request_id, current_user.id)
             flash("Deletion request denied")
         """
@@ -907,36 +907,36 @@ class PendingRequest:
 # APPLICATION INITIALIZATION
 # ==============================================================================
 # The code below runs automatically when this module is imported.
-# It ensures database tables exist and creates a default manager account.
+# It ensures database tables exist and creates a default owner account.
 # ==============================================================================
 
 # Create all database tables if they don't exist
 # Safe to call multiple times (IF NOT EXISTS prevents errors)
 init_db()
 
-# Create default manager account if it doesn't exist
+# Create default owner account if it doesn't exist
 # This allows first-time users to log in without manual database setup
 with get_db_connection() as conn:
-    # Check if manager account already exists
-    existing_manager = conn.execute("SELECT id FROM users WHERE username = 'manager'").fetchone()
+    # Check if owner account already exists (username='manager' for backward compatibility)
+    existing_owner = conn.execute("SELECT id FROM users WHERE username = 'manager'").fetchone()
 
-    if not existing_manager:
-        # Manager doesn't exist - create it
+    if not existing_owner:
+        # Owner doesn't exist - create it
         conn.execute(
             """
             INSERT INTO users (username, password_hash, full_name, email, role)
             VALUES (?, ?, ?, ?, ?)
             """,
             (
-                "manager",                        # Username: manager
+                "manager",                        # Username: manager (kept for backward compatibility)
                 generate_password_hash("12345"),  # Password: 12345 (hashed)
-                "Clinic Manager",                 # Full name
+                "Clinic Owner",                   # Full name
                 "manager@example.com",            # Email
-                "manager",                        # Role: manager
+                "owner",                          # Role: owner
             ),
         )
         conn.commit()
-        print("Default manager account created: username=manager, password=12345")
+        print("Default owner account created: username=manager, password=12345")
 
 
 # ==============================================================================
@@ -961,7 +961,7 @@ FUNCTIONS PROVIDED:
 
 DATABASE SCHEMA:
 
-1. users: Staff accounts (manager, dentist, staff)
+1. users: Staff accounts (owner, dentist, staff)
 2. patients: Patient records and medical information
 3. audit_logs: Activity tracking for compliance
 4. pending_requests: Deletion approval workflow
@@ -990,9 +990,9 @@ USAGE PATTERNS:
     # Staff requests
     PendingRequest.create(patient_id, staff_id)
 
-    # Manager approves
+    # Owner approves
     requests = PendingRequest.get_all_pending()
-    PendingRequest.approve(request_id, manager_id)
+    PendingRequest.approve(request_id, owner_id)
 
     # Then delete patient
     conn.execute("DELETE FROM patients WHERE id = ?", (patient_id,))

@@ -114,7 +114,7 @@ Access: All authenticated users (medical info limited to managers/dentists)
             </div>
 
          <!-- Medical Information Card (Role-Based Access) -->
-         {% if current_user.is_manager() or current_user.is_dentist() or current_user.is_admin() %}
+         {% if current_user.is_owner() or current_user.is_dentist() or current_user.is_admin() %}
             <div class="card shadow mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">Medical Information</h5>

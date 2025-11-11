@@ -70,7 +70,7 @@ class Config:
 
     # BACKUP_FOLDER: Directory where database backups are stored
     # HOW IT WORKS:
-    #   - When manager clicks "Create Backup", database copied to this folder
+    #   - When owner clicks "Create Backup", database copied to this folder
     #   - Filenames include timestamps: backup_20251105_143022.db
     #   - Folder created automatically if it doesn't exist
     # LOCATION:

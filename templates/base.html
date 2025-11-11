@@ -63,15 +63,15 @@ Used by: All other templates extend this base
                         </a>
                     </li>
 
-                    <!-- Staff link - ONLY for managers -->
-                    {% if current_user.is_manager() %}
+                    <!-- Staff link - ONLY for owners -->
+                    {% if current_user.is_owner() %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint in ['staff', 'add_staff', 'edit_staff'] %}active{% endif %}" href="{{ url_for('staff') }}">
                             <i class="bi bi-person-badge"></i> Staff
                         </a>
                     </li>
 
-                    <!-- Backup link - ONLY for managers -->
+                    <!-- Backup link - ONLY for owners -->
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'backup' %}active{% endif %}" href="{{ url_for('backup') }}">
                             <i class="bi bi-database"></i> Backup

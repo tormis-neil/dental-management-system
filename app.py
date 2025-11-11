@@ -11,11 +11,11 @@ WHAT IT CONTAINS:
     2. Authentication Routes: Login, logout, session management
     3. Dashboard Route: Overview page with statistics and recent activity
     4. Patient Routes: CRUD operations for patient records
-    5. Staff Management Routes: CRUD operations for staff accounts (manager only)
-    6. Pending Requests Routes: Deletion approval workflow (manager only)
+    5. Staff Management Routes: CRUD operations for staff accounts (owner only)
+    6. Pending Requests Routes: Deletion approval workflow (owner only)
     7. Profile Management Routes: User can update their own profile
     8. Audit Log Routes: View activity history
-    9. Backup/Restore Routes: Database backup and restore (manager only)
+    9. Backup/Restore Routes: Database backup and restore (owner only)
 
 WHY THIS APPROACH:
     - RESTful Routes: URLs follow REST conventions (/patients, /patients/add, etc.)
@@ -27,7 +27,7 @@ WHY THIS APPROACH:
 SECURITY FEATURES:
     - CSRF Protection: All POST requests require valid token
     - Authentication: Flask-Login manages user sessions
-    - Authorization: Role-based access control (manager/dentist/staff)
+    - Authorization: Role-based access control (owner/dentist/staff)
     - SQL Injection Prevention: Parameterized queries throughout
     - Password Hashing: PBKDF2-SHA256 for all passwords
     - Activity Logging: All actions recorded in audit_logs table
@@ -82,7 +82,7 @@ import os  # File system operations
 from config import Config  # Application configuration
 from models import User, get_db_connection, init_db, PendingRequest  # Database models
 from utils import (
-    manager_required,       # Decorator: route requires manager role
+    owner_required,         # Decorator: route requires owner role
     login_required_custom,  # Custom login decorator (unused, but available)
     log_activity,           # Log user actions to audit_logs
     backup_database,        # Create database backup
@@ -314,7 +314,7 @@ def dashboard():
         - Total patients and staff counts
         - Recent patients (last 5)
         - Recent activities (last 5)
-        - Pending deletion requests (for managers, top 3)
+        - Pending deletion requests (for owners, top 3)
 
     PERMISSIONS:
         @login_required: All authenticated users can access dashboard
@@ -322,12 +322,12 @@ def dashboard():
     HOW IT WORKS:
         1. Initialize variables to default values
         2. Query database for statistics and recent data
-        3. If user is manager: Also fetch pending deletion requests
+        3. If user is owner: Also fetch pending deletion requests
         4. Render dashboard.html with all data
 
     ROLE-SPECIFIC DISPLAY:
         - All users: See patient count, recent patients, recent activities
-        - Managers only: Also see staff count and pending deletion requests
+        - Owners only: Also see staff count and pending deletion requests
         - Staff/Dentists: See limited information
 
     DATABASE QUERIES:
@@ -335,7 +335,7 @@ def dashboard():
         - Total staff: COUNT(*) from users WHERE role='staff'
         - Recent patients: Last 5 patients by created_at
         - Recent activities: Last 5 audit log entries
-        - Pending requests: Last 3 pending deletion requests (managers only)
+        - Pending requests: Last 3 pending deletion requests (owners only)
 
     RETURNS:
         Rendered dashboard.html template with:
@@ -376,8 +376,8 @@ def dashboard():
             ORDER BY timestamp DESC LIMIT 5
         """).fetchall()
 
-        # If user is manager, dentist, or admin: Show pending deletion requests
-        if current_user.is_manager() or current_user.is_dentist() or current_user.is_admin():
+        # If user is owner, dentist, or admin: Show pending deletion requests
+        if current_user.is_owner() or current_user.is_dentist() or current_user.is_admin():
             # Query: Get top 3 pending deletion requests
             # JOIN with patients to get patient name
             rows = conn.execute("""
@@ -529,7 +529,7 @@ def add_patient():
     PERMISSIONS:
         @login_required: All authenticated users can add patients
         Role-specific fields:
-        - Managers/Dentists: Can fill medical fields (allergies, conditions, notes)
+        - Owners/Dentists: Can fill medical fields (allergies, conditions, notes)
         - Staff: Can only fill basic information
 
     METHODS:
@@ -548,7 +548,7 @@ def add_patient():
         - emergency_contact_name (str)
         - emergency_contact_phone (str)
 
-        Medical information (managers/dentists only):
+        Medical information (owners/dentists only):
         - allergies (str)
         - existing_condition (str)
         - dentist_notes (str)
@@ -585,15 +585,15 @@ def add_patient():
         emergency_contact_name = request.form.get("emergency_contact_name")
         emergency_contact_phone = request.form.get("emergency_contact_phone")
 
-        # Initialize medical fields to None (only managers/dentists can set these)
+        # Initialize medical fields to None (only owners/dentists can set these)
         allergies = None
         existing_condition = None
         dentist_notes = None
         assigned_dentist = None
 
         # Check user role to determine which fields they can fill
-        if current_user.is_manager() or current_user.is_dentist() or current_user.is_admin():
-            # Managers/dentists can fill all medical fields
+        if current_user.is_owner() or current_user.is_dentist() or current_user.is_admin():
+            # Owners/dentists can fill all medical fields
             allergies = request.form.get("allergies")
             existing_condition = request.form.get("existing_condition")
             dentist_notes = request.form.get("dentist_notes")
@@ -702,7 +702,7 @@ def edit_patient(patient_id):
     PERMISSIONS:
         @login_required: All authenticated users can edit patients
         Role-specific fields:
-        - Managers/Dentists: Can edit all fields including medical information
+        - Owners/Dentists: Can edit all fields including medical information
         - Staff: Can only edit basic information (not medical fields)
 
     URL PARAMETERS:
@@ -726,7 +726,7 @@ def edit_patient(patient_id):
         5. Redirect to patients list with success message
 
     ROLE-SPECIFIC UPDATES:
-        Managers/Dentists:
+        Owners/Dentists:
         - Update all fields (basic + medical)
 
         Staff:
@@ -763,8 +763,8 @@ def edit_patient(patient_id):
             emergency_contact_phone = request.form.get("emergency_contact_phone")
 
             # Check role to determine which fields to update
-            if current_user.is_manager() or current_user.is_dentist() or current_user.is_admin():
-                # Managers/dentists can update all fields including medical
+            if current_user.is_owner() or current_user.is_dentist() or current_user.is_admin():
+                # Owners/dentists can update all fields including medical
                 allergies = request.form.get("allergies")
                 existing_condition = request.form.get("existing_condition")
                 dentist_notes = request.form.get("dentist_notes")
@@ -820,14 +820,14 @@ def edit_patient(patient_id):
 @login_required
 def delete_patient(patient_id):
     """
-    Delete patient (managers and dentists only).
+    Delete patient (owners and dentists only).
 
     PURPOSE:
         Permanently delete a patient record from database.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        Managers and dentists only: Staff must request deletion (see request_delete_patient)
+        Owners and dentists only: Staff must request deletion (see request_delete_patient)
 
     URL PARAMETERS:
         patient_id (int): ID of patient to delete
@@ -836,7 +836,7 @@ def delete_patient(patient_id):
         POST only (prevents accidental deletion via URL)
 
     HOW IT WORKS:
-        1. Check if user is manager or dentist
+        1. Check if user is owner or dentist
         2. If not: Show error and redirect
         3. If yes: Query patient, delete record, log activity, redirect
 
@@ -847,8 +847,8 @@ def delete_patient(patient_id):
         - CSRF token required (automatic via CSRFProtect)
 
     WORKFLOW:
-        Managers/Dentists: Click "Delete" → Confirm → Patient deleted immediately
-        Staff: Must use "Request Delete" → Manager approves → Patient deleted
+        Owners/Dentists: Click "Delete" → Confirm → Patient deleted immediately
+        Staff: Must use "Request Delete" → Owner approves → Patient deleted
 
     EXAMPLE URL:
         POST /patients/delete/5 → Delete patient with ID 5
@@ -857,8 +857,8 @@ def delete_patient(patient_id):
         Redirect to patients list with success or error message
     """
     # Check if user has permission to delete directly
-    if not (current_user.is_manager() or current_user.is_dentist()):
-        flash("Only managers and dentists can delete patients directly.", "danger")
+    if not (current_user.is_owner() or current_user.is_dentist()):
+        flash("Only owners and dentists can delete patients directly.", "danger")
         return redirect(url_for("patients"))
 
     with get_db_connection() as conn:
@@ -887,14 +887,14 @@ def delete_patient(patient_id):
 @login_required
 def request_delete_patient(patient_id):
     """
-    Request patient deletion (staff only - requires manager approval).
+    Request patient deletion (staff only - requires owner approval).
 
     PURPOSE:
-        Allow staff to request patient deletion (managers must approve).
+        Allow staff to request patient deletion (owners must approve).
 
     PERMISSIONS:
         @login_required: Must be logged in
-        Staff only: Managers/dentists can delete directly (see delete_patient)
+        Staff only: Owners/dentists can delete directly (see delete_patient)
 
     URL PARAMETERS:
         patient_id (int): ID of patient to request deletion for
@@ -911,9 +911,9 @@ def request_delete_patient(patient_id):
     WORKFLOW:
         1. Staff clicks "Request Delete" button
         2. Pending request created in database (status='pending')
-        3. Manager sees request in pending_requests page
-        4. Manager approves/denies request
-        5. If approved: Patient deleted by manager
+        3. Owner sees request in pending_requests page
+        4. Owner approves/denies request
+        5. If approved: Patient deleted by owner
 
     EXAMPLE URL:
         POST /patients/request_delete/5 → Request deletion of patient ID 5
@@ -957,25 +957,25 @@ def request_delete_patient(patient_id):
 
 
 # ==============================================================================
-# PENDING REQUESTS ROUTES (Manager Only)
+# PENDING REQUESTS ROUTES (Owner Only)
 # ==============================================================================
 # Routes for viewing and approving/denying patient deletion requests.
-# Only managers can access these routes.
+# Only owners can access these routes.
 # ==============================================================================
 
 @app.route("/pending_requests")
 @login_required
-@manager_required
+@owner_required
 def pending_requests_view():
     """
-    View all pending deletion requests (manager only).
+    View all pending deletion requests (owner only).
 
     PURPOSE:
-        Display all pending patient deletion requests for manager approval.
+        Display all pending patient deletion requests for owner approval.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can view pending requests
+        @owner_required: Only managers can view pending requests
 
     QUERY PARAMETERS:
         search (str): Search by patient name or request ID
@@ -1025,17 +1025,17 @@ def pending_requests_view():
 
 @app.route("/pending_requests/approve/<int:request_id>", methods=["POST"])
 @login_required
-@manager_required
+@owner_required
 def approve_request(request_id):
     """
-    Approve deletion request and delete patient (manager only).
+    Approve deletion request and delete patient (owner only).
 
     PURPOSE:
-        Manager approves deletion request and patient is permanently deleted.
+        Owner approves deletion request and patient is permanently deleted.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can approve deletions
+        @owner_required: Only owners can approve deletions
 
     URL PARAMETERS:
         request_id (int): ID of pending request to approve
@@ -1053,7 +1053,7 @@ def approve_request(request_id):
 
     WORKFLOW:
         1. Staff requests deletion → pending_requests table (status='pending')
-        2. Manager clicks "Approve" → This route
+        2. Owner clicks "Approve" → This route
         3. Request status updated to 'approved'
         4. Patient deleted from patients table
         5. Request remains in database for audit trail
@@ -1091,17 +1091,17 @@ def approve_request(request_id):
 
 @app.route("/pending_requests/deny/<int:request_id>", methods=["POST"])
 @login_required
-@manager_required
+@owner_required
 def deny_request(request_id):
     """
-    Deny deletion request (manager only).
+    Deny deletion request (owner only).
 
     PURPOSE:
-        Manager denies deletion request - patient record remains in database.
+        Owner denies deletion request - patient record remains in database.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can deny deletions
+        @owner_required: Only owners can deny deletions
 
     URL PARAMETERS:
         request_id (int): ID of pending request to deny
@@ -1140,25 +1140,25 @@ def deny_request(request_id):
 
 
 # ==============================================================================
-# STAFF MANAGEMENT ROUTES (Manager Only)
+# STAFF MANAGEMENT ROUTES (Owner Only)
 # ==============================================================================
 # CRUD operations for staff accounts: List, Add, Edit, Delete.
-# Only managers can access these routes.
+# Only owners can access these routes.
 # ==============================================================================
 
 @app.route("/staff")
 @login_required
-@manager_required
+@owner_required
 def staff():
     """
-    Staff list page with search and filter (manager only).
+    Staff list page with search and filter (owner only).
 
     PURPOSE:
         Display all staff members in a table with search and status filter.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can view staff list
+        @owner_required: Only owners can view staff list
 
     QUERY PARAMETERS:
         - search (str): Search by name, username, or staff ID
@@ -1219,17 +1219,17 @@ def staff():
 
 @app.route("/add_staff", methods=["GET", "POST"])
 @login_required
-@manager_required
+@owner_required
 def add_staff():
     """
-    Add new staff member (manager only).
+    Add new staff member (owner only).
 
     PURPOSE:
         Display form to add new staff account (GET) and process submission (POST).
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can add staff
+        @owner_required: Only owners can add staff
 
     METHODS:
         GET: Display add_staff.html form
@@ -1285,17 +1285,17 @@ def add_staff():
 
 @app.route("/edit_staff/<int:staff_id>", methods=["GET", "POST"])
 @login_required
-@manager_required
+@owner_required
 def edit_staff(staff_id):
     """
-    Edit staff member (manager only).
+    Edit staff member (owner only).
 
     PURPOSE:
         Display form to edit staff account (GET) and process updates (POST).
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can edit staff
+        @owner_required: Only owners can edit staff
 
     URL PARAMETERS:
         staff_id (int): ID of staff to edit
@@ -1382,17 +1382,17 @@ def edit_staff(staff_id):
 
 @app.route("/staff/delete/<int:staff_id>", methods=["POST"])
 @login_required
-@manager_required
+@owner_required
 def delete_staff(staff_id):
     """
-    Delete staff member (manager only).
+    Delete staff member (owner only).
 
     PURPOSE:
         Permanently delete a staff account from database.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can delete staff
+        @owner_required: Only owners can delete staff
 
     URL PARAMETERS:
         staff_id (int): ID of staff to delete
@@ -1408,7 +1408,7 @@ def delete_staff(staff_id):
 
     SECURITY:
         - POST-only route (prevents CSRF via GET)
-        - Manager-only access
+        - Owner-only access
         - Activity logged for audit trail
         - CSRF token required
 
@@ -1565,12 +1565,12 @@ def audit_logs():
     PERMISSIONS:
         @login_required: All authenticated users can view logs
         Access level:
-        - Managers: See all logs (all users' activities)
+        - Owners: See all logs (all users' activities)
         - Other roles: See only their own logs
 
     HOW IT WORKS:
-        1. Check if current user is manager
-        2. If manager: Query all logs (last 100)
+        1. Check if current user is owner
+        2. If owner: Query all logs (last 100)
         3. If not: Query only logs for current user (last 100)
         4. Render audit_logs.html with log entries
 
@@ -1592,8 +1592,8 @@ def audit_logs():
     """
     with get_db_connection() as conn:
         # Check user role to determine which logs to show
-        if current_user.is_manager():
-            # Managers see all logs
+        if current_user.is_owner():
+            # Owners see all logs
             logs = conn.execute("SELECT * FROM audit_logs ORDER BY timestamp DESC LIMIT 100").fetchall()
         else:
             # Other users see only their own logs
@@ -1610,25 +1610,25 @@ def audit_logs():
 
 
 # ==============================================================================
-# BACKUP AND RESTORE ROUTES (Manager Only)
+# BACKUP AND RESTORE ROUTES (Owner Only)
 # ==============================================================================
 # Routes for database backup, restore, and download.
-# Only managers can access these routes.
+# Only owners can access these routes.
 # ==============================================================================
 
 @app.route("/backup")
 @login_required
-@manager_required
+@owner_required
 def backup():
     """
-    Backup management page (manager only).
+    Backup management page (owner only).
 
     PURPOSE:
         Display list of available backups with options to create, download, or restore.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can manage backups
+        @owner_required: Only owners can manage backups
 
     HOW IT WORKS:
         1. Ensure backup folder exists
@@ -1669,17 +1669,17 @@ def backup():
 
 @app.route("/create_backup", methods=["POST"])
 @login_required
-@manager_required
+@owner_required
 def create_backup():
     """
-    Create database backup (manager only).
+    Create database backup (owner only).
 
     PURPOSE:
         Create a timestamped backup of the current database.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can create backups
+        @owner_required: Only owners can create backups
 
     METHOD:
         POST only
@@ -1726,17 +1726,17 @@ def create_backup():
 
 @app.route("/backup/download/<path:filename>")
 @login_required
-@manager_required
+@owner_required
 def download_backup(filename):
     """
-    Download backup file (manager only).
+    Download backup file (owner only).
 
     PURPOSE:
         Send backup file to user's browser for download.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can download backups
+        @owner_required: Only owners can download backups
 
     URL PARAMETERS:
         filename (path): Name of backup file to download
@@ -1750,7 +1750,7 @@ def download_backup(filename):
     SECURITY:
         - safe_join() prevents directory traversal attacks
           (e.g., filename="../../../etc/passwd" is blocked)
-        - Manager-only access
+        - Owner-only access
         - File existence check
 
     EXAMPLE URL:
@@ -1785,17 +1785,17 @@ def download_backup(filename):
 
 @app.route("/backup/restore/<path:filename>", methods=["POST"])
 @login_required
-@manager_required
+@owner_required
 def restore_backup(filename):
     """
-    Restore database from backup (manager only).
+    Restore database from backup (owner only).
 
     PURPOSE:
         Replace current database with a backup file.
 
     PERMISSIONS:
         @login_required: Must be logged in
-        @manager_required: Only managers can restore backups
+        @owner_required: Only owners can restore backups
 
     URL PARAMETERS:
         filename (path): Name of backup file to restore
@@ -1819,7 +1819,7 @@ def restore_backup(filename):
     SECURITY:
         - safe_join() prevents directory traversal
         - POST-only route
-        - Manager-only access
+        - Owner-only access
         - Activity logged
 
     EXAMPLE URL:
@@ -1997,15 +1997,15 @@ PATIENT MANAGEMENT:
     GET  /patients/view/<id>        → View patient details
     GET  /patients/edit/<id>        → Display edit patient form
     POST /patients/edit/<id>        → Update patient
-    POST /patients/delete/<id>      → Delete patient (managers/dentists only)
+    POST /patients/delete/<id>      → Delete patient (owners/dentists only)
     POST /patients/request_delete/<id> → Request deletion (staff only)
 
-PENDING REQUESTS (Manager Only):
+PENDING REQUESTS (Owner Only):
     GET  /pending_requests          → List pending deletion requests
     POST /pending_requests/approve/<id> → Approve and delete patient
     POST /pending_requests/deny/<id>    → Deny deletion request
 
-STAFF MANAGEMENT (Manager Only):
+STAFF MANAGEMENT (Owner Only):
     GET  /staff                     → List all staff (with search/filter)
     GET  /add_staff                 → Display add staff form
     POST /add_staff                 → Create new staff account
@@ -2022,7 +2022,7 @@ PROFILE & SETTINGS:
 AUDIT LOGS:
     GET  /audit_logs                → View activity logs
 
-BACKUP & RESTORE (Manager Only):
+BACKUP & RESTORE (Owner Only):
     GET  /backup                    → List backups
     POST /create_backup             → Create new backup
     GET  /backup/download/<filename> → Download backup file
@@ -2044,7 +2044,7 @@ DESIGN PATTERNS:
     - Flash messages (user feedback)
 
 ROLE PERMISSIONS:
-    Manager:
+    Owner:
         - Full access to all features
         - Manage staff accounts
         - Approve/deny deletion requests
@@ -2060,6 +2060,6 @@ ROLE PERMISSIONS:
     Staff:
         - Manage patients (add/edit/view)
         - Cannot edit medical information
-        - Request patient deletion (requires manager approval)
+        - Request patient deletion (requires owner approval)
         - View own audit logs
 """

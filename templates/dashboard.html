@@ -4,8 +4,8 @@ DASHBOARD - Main Overview Page
 ================================================================================
 Purpose: Display system statistics, recent activities, and pending requests
 Extends: base.html
-Features: Statistics cards, recent patients/activities tables, manager-specific sections
-Access: All authenticated users (some sections manager-only)
+Features: Statistics cards, recent patients/activities tables, owner-specific sections
+Access: All authenticated users (some sections owner-only)
 ================================================================================
 #}
 {% extends "base.html" %}
@@ -13,12 +13,12 @@ Access: All authenticated users (some sections manager-only)
 {% block title %}Dashboard - Dental Clinic{% endblock %}
 
 {% block content %}
-<!-- Page Header with Pending Requests Button (manager only) -->
+<!-- Page Header with Pending Requests Button (owner only) -->
 <div class="dashboard-header d-flex align-items-center mb-4">
   <h2 class="mb-0 text-pink"><i class="bi bi-speedometer2"></i> Dashboard</h2>
 
-  <!-- Pending Requests Button: Only visible to managers -->
-  {% if current_user.is_manager() %}
+  <!-- Pending Requests Button: Only visible to owners -->
+  {% if current_user.is_owner() %}
   <a href="{{ url_for('pending_requests_view') }}" class="btn btn-outline-danger position-relative ms-3">
     <i class="bi bi-exclamation-triangle"></i> Pending Requests
     <!-- Badge showing count of pending deletion requests -->
@@ -54,8 +54,8 @@ Access: All authenticated users (some sections manager-only)
       </a>
     </div>
 
-    <!-- Staff Members Card (manager only, clickable) -->
-    {% if current_user.is_manager() %}
+    <!-- Staff Members Card (owner only, clickable) -->
+    {% if current_user.is_owner() %}
     <div class="col-md-3">
       <a href="{{ url_for('staff') }}" class="text-decoration-none">
         <div class="card bg-dark-pink text-white shadow card-clickable">
@@ -93,8 +93,8 @@ Access: All authenticated users (some sections manager-only)
     </div>
   </div>
 
-  <!-- Pending Deletion Requests Section (manager only, top 3 recent requests) -->
-  {% if current_user.is_manager() and pending_requests %}
+  <!-- Pending Deletion Requests Section (owner only, top 3 recent requests) -->
+  {% if current_user.is_owner() and pending_requests %}
   <div class="row mt-4">
     <div class="col-md-12">
       <div class="card shadow">
