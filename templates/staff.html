@@ -90,7 +90,7 @@ Access: Owner only
                                 <span class="badge bg-danger">Inactive</span>
                                 {% endif %}
                             </td>
-                            <td><small>{{ staff.created_at }}</small></td>
+                            <td><small>{{ staff.created_at | format_datetime }}</small></td>
                             <td class="text-nowrap">
                                 <!-- Edit Button -->
                                 <a href="{{ url_for('edit_staff', staff_id=staff.id) }}" class="btn btn-sm btn-warning" title="Edit">

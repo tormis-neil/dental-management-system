@@ -77,6 +77,7 @@ from typing import Optional
 
 # Standard library imports
 import os  # File system operations
+from datetime import datetime  # For timestamp formatting
 
 # Import from our modules
 from config import Config  # Application configuration
@@ -108,6 +109,41 @@ app.config.from_object(Config)
 # This prevents Cross-Site Request Forgery attacks
 # All forms must include {{ csrf_token() }} in templates
 csrf = CSRFProtect(app)
+
+
+# ==============================================================================
+# CUSTOM JINJA2 FILTERS
+# ==============================================================================
+# Custom template filters for formatting data in templates
+# ==============================================================================
+
+@app.template_filter('format_datetime')
+def format_datetime_filter(timestamp_str):
+    """
+    Format SQLite timestamp string to user-friendly format.
+
+    PURPOSE:
+        Convert database timestamp (YYYY-MM-DD HH:MM:SS) to readable format.
+        Example: "2025-11-11 14:23:45" → "Nov 11, 2025 at 2:23 PM"
+
+    PARAMETERS:
+        timestamp_str (str): SQLite timestamp string
+
+    RETURNS:
+        str: Formatted datetime string or original if parsing fails
+
+    USAGE IN TEMPLATES:
+        {{ log.timestamp | format_datetime }}
+        {{ patient.created_at | format_datetime }}
+    """
+    try:
+        # Parse SQLite timestamp format: "YYYY-MM-DD HH:MM:SS"
+        dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+        # Format as: "Nov 11, 2025 at 2:23 PM"
+        return dt.strftime('%b %d, %Y at %I:%M %p')
+    except (ValueError, TypeError, AttributeError):
+        # If parsing fails, return original string
+        return timestamp_str
 
 
 # ==============================================================================

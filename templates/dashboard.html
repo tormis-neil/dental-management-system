@@ -118,7 +118,7 @@ Access: All authenticated users (some sections owner-only)
                 <tr>
                   <td>{{ request['first_name'] }} {{ request['last_name'] }}</td>
                   <td>{{ request['requested_by_name'] }}</td>
-                  <td><small>{{ request['requested_at'] }}</small></td>
+                  <td><small>{{ request['requested_at'] | format_datetime }}</small></td>
                   <td>
                     <!-- Approve Form -->
                     <form action="{{ url_for('approve_request', request_id=request['id']) }}" method="POST" style="display:inline;">
@@ -172,7 +172,7 @@ Access: All authenticated users (some sections owner-only)
                 <tr>
                   <td>{{ activity.username }}</td>
                   <td><span class="badge bg-secondary">{{ activity.action }}</span></td>
-                  <td><small>{{ activity.timestamp }}</small></td>
+                  <td><small>{{ activity.timestamp | format_datetime }}</small></td>
                 </tr>
                 {% else %}
                 <!-- Show message if no activities found -->
@@ -209,7 +209,7 @@ Access: All authenticated users (some sections owner-only)
                 <tr>
                   <td>{{ patient.first_name }} {{ patient.last_name }}</td>
                   <td>{{ patient.phone }}</td>
-                  <td><small>{{ patient.created_at }}</small></td>
+                  <td><small>{{ patient.created_at | format_datetime }}</small></td>
                 </tr>
                 {% else %}
                 <!-- Show message if no patients found -->

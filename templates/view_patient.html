@@ -174,8 +174,8 @@ Access: All authenticated users (medical info limited to managers/dentists)
                     <h5 class="mb-0">Visit History</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Created:</strong><br>{{ patient.created_at }}</p>
-                    <p><strong>Last Updated:</strong><br>{{ patient.updated_at }}</p>
+                    <p><strong>Created:</strong><br>{{ patient.created_at | format_datetime }}</p>
+                    <p><strong>Last Updated:</strong><br>{{ patient.updated_at | format_datetime }}</p>
                 </div>
             </div>
         </div>

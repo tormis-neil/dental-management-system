@@ -66,7 +66,7 @@ Note: Staff can request patient deletion; owners must approve/deny
                             <td>{{ req.first_name }} {{ req.last_name }}</td>
                             <td><span class="badge bg-warning">Patient Deletion</span></td>
                             <td>{{ req.requested_by_name }}</td>
-                            <td><small>{{ req.requested_at }}</small></td>
+                            <td><small>{{ req.requested_at | format_datetime }}</small></td>
                             <td><span class="badge bg-danger">{{ req.status|upper }}</span></td>
                             <td>
                                 <!-- Approve Form with JavaScript confirmation -->
